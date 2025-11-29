@@ -3,17 +3,18 @@ from tkinter import Canvas, NW
 from PIL import Image, ImageTk
 import webbrowser
 
-# === Dictionnaire de couleurs ===
+
+# Dictionnaire de couleurs 
 couleur = {
     "nero": "#252726",
     "purple": "#800080",
     "white": "#FFFFFF"
 }
 
-# === Couleur de fond identique à l'image ===
+# Couleur de fond identique à l'image
 couleurFondImage = "#00AEEF"  # bleu clair
 
-# === Fenêtre principale ===
+# Fenêtre principale 
 app = tk.Tk()
 app.title("Mon application")
 app.config(bg=couleurFondImage)
@@ -33,7 +34,7 @@ try:
     navIcon = ImageTk.PhotoImage(Image.open("menu.png").resize((25, 25)))
     closeIcon = ImageTk.PhotoImage(Image.open("Close.png").resize((25, 25)))
 except Exception as e:
-    print("⚠️ Problème de chargement image :", e)
+    print("Problème de chargement image :", e)
     navIcon = closeIcon = None
 
 # === BARRE DU HAUT ===
