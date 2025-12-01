@@ -6,9 +6,16 @@ import webbrowser
 
 # Dictionnaire de couleurs 
 couleur = {
-    "nero": "#252726",
-    "purple": "#800080",
-    "white": "#FFFFFF"
+    "primary": "#0d47a1",
+    "primary_dark": "#002171",
+    "accent": "#00AEEF",
+    "white": "#FFFFFF",
+    "dark": "#252726",
+    "light_bg": "#F5F5F5",
+    "success": "#4CAF50",
+    "danger": "#d32f2f",
+    "warning": "#ff9800",
+    "admin": "#9c27b0"
 }
 
 # Couleur de fond identique à l'image
@@ -16,9 +23,16 @@ couleurFondImage = "#00AEEF"  # bleu clair
 
 # Fenêtre principale 
 app = tk.Tk()
-app.title("Mon application")
-app.config(bg=couleurFondImage)
-app.geometry("500x500")
+app.title("JobFinder - Trouvez votre emploi idéal")
+app.config(bg=couleur["light_bg"])
+app.geometry("600x700")
+app.resizable(False, False)
+
+try:
+    app.iconbitmap("logo.ico")
+except:
+    pass
+
 
 # === Icône (facultative) ===
 try:
@@ -28,6 +42,8 @@ except Exception as e:
 
 # État du menu
 btnEtat = False
+current_user = None
+user_type = None
 
 # === Chargement des images ===
 try:
