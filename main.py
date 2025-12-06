@@ -9,12 +9,13 @@ from PIL import Image, ImageTk
 from config import COULEURS, APP_CONFIG, IMAGES
 from database import init_db
 import ui
-from ui.auth import show_inscription, show_connexion
+from ui.auth import show_inscription
 from ui.profile import show_profil
 from ui.contact import show_contact
 from ui.offers import show_offres
 from ui.admin import show_admin_dashboard
 from ui.settings import show_parametres
+from ui.init import set_btn_state, get_btn_state, set_current_user,get_current_user
 
 class JobFinderApp:
     def __init__(self):
@@ -101,15 +102,80 @@ class JobFinderApp:
         ).place(x=0, y=0)
         
         self.update_menu()
-    
     def update_menu(self):
-        pass
+        
+        current_user, user_type = get_current_user()
+        
+        if user_type == "admin":
+            menu_buttons = [
+                ("🏠  Accueil", self.show_accueil),
+                ("📊  Dashboard Admin", self.go_admin_dashboard),
+                ("👥  Utilisateurs", lambda: self.go_admin_users()),
+                ("💼  Offres d'emploi", self.go_offres),
+                ("⚙️  Paramètres", self.go_parametres),
+                ("📞  Contact", self.go_contact)
+            ]
+        else:
+            menu_buttons = [
+                ("🏠  Accueil", self.show_accueil),
+                ("👤  Profil", self.go_profil),
+                ("💼  Offres d'emploi", self.go_offres),
+                ("⚙️  Paramètres", self.go_parametres),
+                ("📞  Contact", self.go_contact)
+            ]
+        
+        # Effacer les anciens boutons
+        for widget in self.navLateral.winfo_children():
+            if isinstance(widget, tk.Button):
+                widget.destroy()
+        
+        y = 80
+        for text, cmd in menu_buttons:
+            btn = tk.Button(
+                self.navLateral,
+                text=text,
+                font=("Arial", 13, "bold"),
+                bg="#263238",
+                fg=COULEURS["white"],
+                activebackground="#37474f",
+                bd=0,
+                cursor="hand2",
+                anchor="w",
+                padx=20,
+                width=25,
+                height=2,
+                command=cmd
+            )
+            btn.place(x=0, y=y)
+            
+            btn.bind("<Enter>", lambda e, b=btn: b.config(bg="#37474f"))
+            btn.bind("<Leave>", lambda e, b=btn: b.config(bg="#263238"))
+            
+            y += 55
     
     def toggle_menu(self):
-        pass
+        """Toggle l'animation du menu"""
+        if get_btn_state():
+            for x in range(0, 301, 15):
+                self.navLateral.place(x=-x, y=0)
+                self.app.update()
+            self.navLateral.place(x=-300, y=0)
+            self.navbarBtn.config(image=self.navIcon)
+            set_btn_state(False)
+        else:
+            self.update_menu()
+            for x in range(-300, 1, 15):
+                self.navLateral.place(x=x, y=0)
+                self.app.update()
+            self.navLateral.place(x=0, y=0)
+            self.topFrame.tkraise()
+            self.navbarBtn.config(image=self.closeIcon)
+            set_btn_state(True)
     
     def close_menu_if_open(self):
-        pass
+        """Ferme le menu s'il est ouvert"""
+        if get_btn_state():
+            self.toggle_menu()
     
     def show_accueil(self):
         """Affiche la page d'accueil"""
@@ -249,8 +315,7 @@ class JobFinderApp:
     
     def go_connexion(self):
         """Affiche la page de connexion"""
-        self.close_menu_if_open()
-        show_connexion(self.mainFrame, self.go_profil, self.go_admin_dashboard, self.go_inscription)
+        pass
     
     def go_profil(self):
         """Affiche le profil"""

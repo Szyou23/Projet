@@ -72,7 +72,7 @@ def show_inscription(main_frame, go_profil_callback, go_connexion_callback):
     ).pack(pady=10)
 
     # Choix du type d'utilisateur avec RadioButton
-    type_var = tk.StringVar(va  lue="chercheur")
+    type_var = tk.StringVar(value="chercheur")
 
     radioFrame = tk.Frame(container, bg=COULEURS["white"])
     radioFrame.pack(pady=10)

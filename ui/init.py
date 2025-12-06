@@ -35,6 +35,5 @@ def get_btn_state():
     return btnEtat
 
 def set_btn_state(state):
-    
     global btnEtat
     btnEtat = state
