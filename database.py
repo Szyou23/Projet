@@ -21,13 +21,13 @@ def init_db():
     try:
         conn = mysql.connector.connect(
             host=DB_CONFIG['host'],
-            user=DB_CONFIG['user'],
-            password=DB_CONFIG['password']
+            user=DB_CONFIG['root'],
+            password=DB_CONFIG['']
         )
         cursor = conn.cursor()
         
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_CONFIG['database']}")
-        cursor.execute(f"USE {DB_CONFIG['database']}")
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_CONFIG['jobfinder']}")
+        cursor.execute(f"USE {DB_CONFIG['jobfinder']}")
         
         # Vérifier si la table existe
         cursor.execute("SHOW TABLES LIKE 'utilisateurs'")

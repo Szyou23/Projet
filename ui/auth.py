@@ -158,3 +158,6 @@ def show_inscription(main_frame, go_profil_callback, go_connexion_callback):
     )
     lienLogin.pack(pady=10)
     lienLogin.bind("<Button-1>", lambda e: go_connexion_callback())
+
+def ajouter_utilisateur(nom, email, mdp, type_user, go_profil_callback):
+    return
