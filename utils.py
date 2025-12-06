@@ -1,6 +1,3 @@
-"""
-Fonctions utilitaires pour JobFinder
-"""
 import hashlib
 import re
 
