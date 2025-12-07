@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 from config import COULEURS
-from utils import valider_email
+from database import get_db_connection
+from utils import hash_password, valider_email
 import ui
 
 def show_inscription(main_frame, go_profil_callback, go_connexion_callback):
@@ -160,4 +161,93 @@ def show_inscription(main_frame, go_profil_callback, go_connexion_callback):
     lienLogin.bind("<Button-1>", lambda e: go_connexion_callback())
 
 def ajouter_utilisateur(nom, email, mdp, type_user, go_profil_callback):
-    return
+    """Ajoute un nouvel utilisateur dans la base de données avec validation d'email"""
+    # Validation des champs obligatoires
+    if not nom or not email or not mdp or not type_user:
+        messagebox.showerror("Erreur", "Tous les champs sont obligatoires !")
+        return
+    
+    # Nettoyer l'email (supprimer les espaces)
+    email = email.strip().lower()
+    
+    # Validation du nom
+    if len(nom) < 2:
+        messagebox.showerror("Erreur", "Le nom doit contenir au moins 2 caractères !")
+        return
+    
+    # Validation de l'email
+    if not valider_email(email):
+        messagebox.showerror("Erreur", "Format d'email invalide !\n\nVeuillez saisir une adresse email valide.\nExemple : nom@domaine.com")
+        return
+    
+    # Vérifications supplémentaires pour l'email
+    if len(email) > 100:
+        messagebox.showerror("Erreur", "L'adresse email est trop longue (max 100 caractères) !")
+        return
+    
+    # Vérifier les domaines recommandés pour les entreprises
+    if type_user == "recruteur":
+        domaines_publics = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com']
+        domaine = email.split('@')[1].lower()
+        if domaine in domaines_publics:
+            reponse = messagebox.askyesno(
+                "Attention",
+                f"Vous utilisez une adresse email personnelle ({domaine}).\n\n"
+                "Pour un compte recruteur, il est recommandé d'utiliser une adresse email professionnelle.\n\n"
+                "Voulez-vous continuer quand même ?"
+            )
+            if not reponse:
+                return
+    
+    # Validation du mot de passe
+    if len(mdp) < 6:
+        messagebox.showerror("Erreur", "Le mot de passe doit contenir au moins 6 caractères !")
+        return
+    
+    # Recommandation pour un mot de passe fort
+    if len(mdp) < 8 or not any(c.isdigit() for c in mdp):
+        reponse = messagebox.askyesno(
+            "Mot de passe faible",
+            "Votre mot de passe semble faible.\n\n"
+            "Un mot de passe fort devrait contenir :\n"
+            "• Au moins 8 caractères\n"
+            "• Des chiffres et des lettres\n\n"
+            "Voulez-vous continuer avec ce mot de passe ?"
+        )
+        if not reponse:
+            return
+
+    conn = get_db_connection()
+    if not conn:
+        return
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Vérifier si l'email existe déjà (double vérification)
+        cursor.execute("SELECT email FROM utilisateurs WHERE LOWER(email) = %s", (email,))
+        if cursor.fetchone():
+            cursor.close()
+            conn.close()
+            messagebox.showerror("Erreur", "Cette adresse email est déjà enregistrée !\n\nVeuillez utiliser une autre adresse email ou vous connecter avec votre compte existant.")
+            return
+        
+        mdp_hash = hash_password(mdp)
+        cursor.execute(
+            "INSERT INTO utilisateurs (nom, email, mot_de_passe, type_utilisateur) VALUES (%s, %s, %s, %s)",
+            (nom, email, mdp_hash, type_user)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        type_display = "Recruteur" if type_user == "recruteur" else "Chercheur d'emploi"
+        messagebox.showinfo("Succès", f"Bienvenue {nom} !\n\nVotre compte {type_display} a été créé avec succès.\n\nEmail : {email}")
+        
+        ui.set_current_user(email, type_user)
+        go_profil_callback()
+    except Error as e:
+        if "Duplicate entry" in str(e):
+            messagebox.showerror("Erreur", "Cette adresse email est déjà enregistrée !")
+        else:
+            messagebox.showerror("Erreur", f"Erreur lors de l'inscription: {e}")
