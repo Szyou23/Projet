@@ -251,3 +251,90 @@ def ajouter_utilisateur(nom, email, mdp, type_user, go_profil_callback):
             messagebox.showerror("Erreur", "Cette adresse email est déjà enregistrée !")
         else:
             messagebox.showerror("Erreur", f"Erreur lors de l'inscription: {e}")
+
+def show_connexion(main_frame, go_profil_callback, go_admin_callback, go_inscription_callback):
+    """Affiche la page de connexion"""
+    for widget in main_frame.winfo_children():
+        widget.destroy()
+
+    container = tk.Frame(main_frame, bg=COULEURS["white"], width=400, height=450)
+    container.place(relx=0.5, rely=0.5, anchor="center")
+
+    tk.Label(
+        container,
+        text="Bon retour !",
+        font=("Arial", 24, "bold"),
+        bg=COULEURS["white"],
+        fg=COULEURS["primary"]
+    ).pack(pady=30)
+
+    tk.Label(container, text="Adresse email", font=("Arial", 11),
+             bg=COULEURS["white"], fg=COULEURS["dark"]).pack(anchor="w", padx=40)
+    entryEmail = tk.Entry(container, width=35, font=("Arial", 11), bd=2, relief="groove")
+    entryEmail.pack(pady=(5, 15), padx=40)
+
+    tk.Label(container, text="Mot de passe", font=("Arial", 11),
+             bg=COULEURS["white"], fg=COULEURS["dark"]).pack(anchor="w", padx=40)
+    entryMDP = tk.Entry(container, show="●", width=35, font=("Arial", 11), bd=2, relief="groove")
+    entryMDP.pack(pady=(5, 20), padx=40)
+
+    def connecter():
+        email = entryEmail.get()
+        mdp = entryMDP.get()
+        
+        if not email or not mdp:
+            messagebox.showerror("Erreur", "Veuillez remplir tous les champs !")
+            return
+        
+        conn = get_db_connection()
+        if not conn:
+            return
+        
+        try:
+            cursor = conn.cursor()
+            mdp_hash = hash_password(mdp)
+            cursor.execute(
+                "SELECT email, type_utilisateur FROM utilisateurs WHERE email=%s AND mot_de_passe=%s",
+                (email, mdp_hash)
+            )
+            user = cursor.fetchone()
+            cursor.close()
+            conn.close()
+
+            if user:
+                messagebox.showinfo("Connexion", "Connexion réussie !")
+                ui.set_current_user(user[0], user[1])
+                
+                # Redirection selon le type
+                if user[1] == "admin":
+                    go_admin_callback()
+                else:
+                    go_profil_callback()
+            else:
+                messagebox.showerror("Erreur", "Email ou mot de passe incorrect !")
+        except Error as e:
+            messagebox.showerror("Erreur", f"Erreur de connexion: {e}")
+
+    tk.Button(
+        container,
+        text="Se connecter",
+        font=("Arial", 12, "bold"),
+        bg=COULEURS["primary"],
+        fg=COULEURS["white"],
+        width=30,
+        height=2,
+        cursor="hand2",
+        bd=0,
+        command=connecter
+    ).pack(pady=10)
+
+    lienInscription = tk.Label(
+        container,
+        text="Pas encore de compte ? S'inscrire",
+        font=("Arial", 10, "underline"),
+        bg=COULEURS["white"],
+        fg=COULEURS["primary"],
+        cursor="hand2"
+    )
+    lienInscription.pack(pady=20)
+    lienInscription.bind("<Button-1>", lambda e: go_inscription_callback())
