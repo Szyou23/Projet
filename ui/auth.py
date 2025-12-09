@@ -1,5 +1,10 @@
+# ui/auth.py
+"""
+Gestion de l'authentification (connexion/inscription)
+"""
 import tkinter as tk
 from tkinter import messagebox
+from mysql.connector import Error
 from config import COULEURS
 from database import get_db_connection
 from utils import hash_password, valider_email
@@ -128,7 +133,7 @@ def show_inscription(main_frame, go_profil_callback, go_connexion_callback):
         fg=COULEURS["dark"]
     ).pack(anchor="w", padx=30, pady=(0, 5))
 
-    # Bouton s'inscrire
+    # Bouton S'inscrire
     tk.Button(
         container,
         text="S'inscrire",
@@ -159,6 +164,7 @@ def show_inscription(main_frame, go_profil_callback, go_connexion_callback):
     )
     lienLogin.pack(pady=10)
     lienLogin.bind("<Button-1>", lambda e: go_connexion_callback())
+
 
 def ajouter_utilisateur(nom, email, mdp, type_user, go_profil_callback):
     """Ajoute un nouvel utilisateur dans la base de données avec validation d'email"""
@@ -251,6 +257,7 @@ def ajouter_utilisateur(nom, email, mdp, type_user, go_profil_callback):
             messagebox.showerror("Erreur", "Cette adresse email est déjà enregistrée !")
         else:
             messagebox.showerror("Erreur", f"Erreur lors de l'inscription: {e}")
+
 
 def show_connexion(main_frame, go_profil_callback, go_admin_callback, go_inscription_callback):
     """Affiche la page de connexion"""

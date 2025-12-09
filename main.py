@@ -9,7 +9,7 @@ from PIL import Image, ImageTk
 from config import COULEURS, APP_CONFIG, IMAGES
 from database import init_db
 import ui
-from ui.auth import show_inscription
+from ui.auth import show_inscription, show_connexion
 from ui.profile import show_profil
 from ui.contact import show_contact
 from ui.offers import show_offres
@@ -209,7 +209,7 @@ class JobFinderApp:
         buttonsFrame = tk.Frame(self.mainFrame, bg=COULEURS["light_bg"])
         buttonsFrame.pack(fill="both", expand=True)
 
-        current_user, user_type = ui.get_current_user()
+        current_user, user_type = get_current_user()
         
         if current_user:
             btnContainer = tk.Frame(buttonsFrame, bg=COULEURS["light_bg"])
@@ -315,7 +315,8 @@ class JobFinderApp:
     
     def go_connexion(self):
         """Affiche la page de connexion"""
-        pass
+        self.close_menu_if_open()
+        show_connexion(self.mainFrame, self.go_profil, self.go_admin_dashboard, self.go_inscription)
     
     def go_profil(self):
         """Affiche le profil"""
