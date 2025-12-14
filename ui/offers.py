@@ -1,8 +1,3 @@
-# ui/offers.py (PARTIE 1/2)
-"""
-Gestion des offres d'emploi
-IMPORTANT: Ce fichier est en 2 parties. Copiez les 2 parties dans le même fichier offers.py
-"""
 import tkinter as tk
 from tkinter import messagebox, scrolledtext, ttk
 import webbrowser
