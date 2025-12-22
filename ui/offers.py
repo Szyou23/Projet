@@ -1,13 +1,13 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, scrolledtext, ttk
+import webbrowser
 from mysql.connector import Error
 from config import COULEURS
 from database import get_db_connection
 import ui
 
 def show_offres(main_frame, go_connexion_callback):
-    """Affiche les offres selon le type d'utilisateur"""
-    current_user, user_type = ui.get_current_user()
+    current_user, user_type = get_db_connection()
     
     # Vérifier si l'utilisateur est connecté
     if not current_user:
@@ -132,6 +132,174 @@ def show_toutes_offres(main_frame):
                     bg=COULEURS["light_bg"],
                     fg=COULEURS["dark"]
                 ).pack(pady=50)
+                
+        except Error as e:
+            messagebox.showerror("Erreur", f"Erreur de chargement: {e}")
+def voir_offre(main_frame, offre_id):
+    current_user, user_type = ui.get_current_user()
+    
+    for widget in main_frame.winfo_children():
+        widget.destroy()
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT o.titre, o.entreprise, o.localisation, o.type_contrat, o.salaire, 
+                       o.description, o.competences, o.date_creation, u.nom, u.email
+                FROM offres_emploi o
+                JOIN utilisateurs u ON o.recruteur_id = u.id
+                WHERE o.id = %s
+            """, (offre_id,))
+            offre = cursor.fetchone()
+            cursor.close()
+            conn.close()
+            
+            if offre:
+                titre, entreprise, localisation, type_contrat, salaire, description, competences, date_creation, recruteur_nom, recruteur_email = offre
+                
+                canvas = tk.Canvas(main_frame, bg=COULEURS["light_bg"], highlightthickness=0)
+                scrollbar = tk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
+                container = tk.Frame(canvas, bg=COULEURS["white"])
+                
+                container.bind(
+                    "<Configure>",
+                    lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+                )
+                
+                canvas.create_window((300, 0), window=container, anchor="n", width=550)
+                canvas.configure(yscrollcommand=scrollbar.set)
+                
+                # Header
+                headerFrame = tk.Frame(container, bg=COULEURS["primary"], width=550)
+                headerFrame.pack(fill="x")
+                
+                tk.Label(
+                    headerFrame,
+                    text=titre,
+                    font=("Arial", 20, "bold"),
+                    bg=COULEURS["primary"],
+                    fg=COULEURS["white"],
+                    wraplength=500
+                ).pack(pady=30, padx=20)
+                
+                # Informations principales
+                infoFrame = tk.Frame(container, bg=COULEURS["white"])
+                infoFrame.pack(pady=20, padx=40, fill="x")
+                
+                info_data = [
+                    ("🏢 Entreprise", entreprise),
+                    ("📍 Localisation", localisation),
+                    ("📋 Type de contrat", type_contrat),
+                    ("💰 Salaire", salaire or "Non précisé"),
+                    ("📅 Publiée le", date_creation.strftime("%d/%m/%Y")),
+                    ("👤 Recruteur", recruteur_nom)
+                ]
+                
+                for label, value in info_data:
+                    frameItem = tk.Frame(infoFrame, bg=COULEURS["white"])
+                    frameItem.pack(fill="x", pady=5)
+                    
+                    tk.Label(
+                        frameItem,
+                        text=label,
+                        font=("Arial", 10, "bold"),
+                        bg=COULEURS["white"],
+                        fg=COULEURS["dark"],
+                        width=20,
+                        anchor="w"
+                    ).pack(side="left")
+                    
+                    tk.Label(
+                        frameItem,
+                        text=value,
+                        font=("Arial", 11),
+                        bg=COULEURS["white"],
+                        fg=COULEURS["primary"]
+                    ).pack(side="left")
+                
+                # Séparateur
+                tk.Frame(container, bg=COULEURS["light_bg"], height=2).pack(fill="x", pady=20, padx=40)
+                
+                # Description
+                tk.Label(
+                    container,
+                    text="📄 Description du poste",
+                    font=("Arial", 14, "bold"),
+                    bg=COULEURS["white"],
+                    fg=COULEURS["primary"]
+                ).pack(anchor="w", padx=40, pady=(10, 5))
+                
+                tk.Label(
+                    container,
+                    text=description,
+                    font=("Arial", 11),
+                    bg=COULEURS["white"],
+                    fg=COULEURS["dark"],
+                    wraplength=470,
+                    justify="left"
+                ).pack(anchor="w", padx=40, pady=(0, 20))
+                
+                # Compétences
+                if competences:
+                    tk.Label(
+                        container,
+                        text="⭐ Compétences requises",
+                        font=("Arial", 14, "bold"),
+                        bg=COULEURS["white"],
+                        fg=COULEURS["primary"]
+                    ).pack(anchor="w", padx=40, pady=(10, 5))
+                    
+                    tk.Label(
+                        container,
+                        text=competences,
+                        font=("Arial", 11),
+                        bg=COULEURS["white"],
+                        fg=COULEURS["dark"],
+                        wraplength=470,
+                        justify="left"
+                    ).pack(anchor="w", padx=40, pady=(0, 20))
+                
+                # Contact (uniquement pour chercheurs et admin)
+                if user_type == "chercheur" or user_type == "admin":
+                    tk.Frame(container, bg=COULEURS["light_bg"], height=2).pack(fill="x", pady=20, padx=40)
+                    
+                    tk.Label(
+                        container,
+                        text="📧 Contact",
+                        font=("Arial", 14, "bold"),
+                        bg=COULEURS["white"],
+                        fg=COULEURS["primary"]
+                    ).pack(anchor="w", padx=40, pady=(10, 5))
+                    
+                    contactLabel = tk.Label(
+                        container,
+                        text=recruteur_email,
+                        font=("Arial", 11, "underline"),
+                        bg=COULEURS["white"],
+                        fg=COULEURS["primary"],
+                        cursor="hand2"
+                    )
+                    contactLabel.pack(anchor="w", padx=40, pady=(0, 20))
+                    contactLabel.bind("<Button-1>", lambda e: webbrowser.open(f"mailto:{recruteur_email}"))
+                
+                # Bouton Retour
+                tk.Button(
+                    container,
+                    text="⬅️ Retour",
+                    font=("Arial", 12, "bold"),
+                    bg=COULEURS["primary"],
+                    fg=COULEURS["white"],
+                    width=20,
+                    height=2,
+                    cursor="hand2",
+                    bd=0,
+                    command=lambda: show_offres(main_frame, None)
+                ).pack(pady=30)
+                
+                canvas.pack(side="left", fill="both", expand=True)
+                scrollbar.pack(side="right", fill="y")
                 
         except Error as e:
             messagebox.showerror("Erreur", f"Erreur de chargement: {e}")

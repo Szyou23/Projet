@@ -229,3 +229,6 @@ def show_admin_utilisateurs(main_frame):
     
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
+def voir_offre_admin(main_frame, offre_id):
+    from ui.offers import voir_offre
+    voir_offre(main_frame, offre_id)
