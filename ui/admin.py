@@ -232,3 +232,7 @@ def show_admin_utilisateurs(main_frame):
 def voir_offre_admin(main_frame, offre_id):
     from ui.offers import voir_offre
     voir_offre(main_frame, offre_id)
+def supprimer_offre_admin(main_frame, offre_id):
+    """Supprimer une offre (admin)"""
+    from ui.offers import supprimer_offre
+    supprimer_offre(main_frame, offre_id)
