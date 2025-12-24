@@ -380,7 +380,7 @@ def show_mes_offres(main_frame):
         height=2,
         cursor="hand2",
         bd=0,
-       # command=lambda: show_ajouter_offre(main_frame)
+       command=lambda: show_ajouter_offre(main_frame)
     ).pack()
     
     conn = get_db_connection()
@@ -491,3 +491,108 @@ def show_mes_offres(main_frame):
     
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
+def show_ajouter_offre(main_frame):
+    """Formulaire pour ajouter une nouvelle offre"""
+    current_user, user_type = ui.get_current_user()
+    
+    for widget in main_frame.winfo_children():
+        widget.destroy()
+    
+    canvas = tk.Canvas(main_frame, bg=COULEURS["light_bg"], highlightthickness=0)
+    scrollbar = tk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
+    container = tk.Frame(canvas, bg=COULEURS["white"])
+    
+    container.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+    
+    canvas.create_window((300, 0), window=container, anchor="n", width=550)
+    canvas.configure(yscrollcommand=scrollbar.set)
+    
+    tk.Label(
+        container,
+        text="➕ Publier une offre d'emploi",
+        font=("Arial", 22, "bold"),
+        bg=COULEURS["white"],
+        fg=COULEURS["primary"]
+    ).pack(pady=30)
+    
+    # Titre
+    tk.Label(container, text="Titre du poste *", font=("Arial", 11, "bold"),
+             bg=COULEURS["white"], fg=COULEURS["dark"]).pack(anchor="w", padx=40)
+    entryTitre = tk.Entry(container, width=50, font=("Arial", 11), bd=2, relief="groove")
+    entryTitre.pack(pady=(5, 15), padx=40)
+    
+    # Entreprise
+    tk.Label(container, text="Nom de l'entreprise *", font=("Arial", 11, "bold"),
+             bg=COULEURS["white"], fg=COULEURS["dark"]).pack(anchor="w", padx=40)
+    entryEntreprise = tk.Entry(container, width=50, font=("Arial", 11), bd=2, relief="groove")
+    entryEntreprise.pack(pady=(5, 15), padx=40)
+    
+    # Localisation
+    tk.Label(container, text="Localisation *", font=("Arial", 11, "bold"),
+             bg=COULEURS["white"], fg=COULEURS["dark"]).pack(anchor="w", padx=40)
+    entryLocalisation = tk.Entry(container, width=50, font=("Arial", 11), bd=2, relief="groove")
+    entryLocalisation.pack(pady=(5, 15), padx=40)
+    
+    # Type de contrat
+    tk.Label(container, text="Type de contrat *", font=("Arial", 11, "bold"),
+             bg=COULEURS["white"], fg=COULEURS["dark"]).pack(anchor="w", padx=40)
+    comboContrat = ttk.Combobox(container, width=48, font=("Arial", 11), state="readonly")
+    comboContrat['values'] = ('CDI', 'CDD', 'Stage', 'Freelance', 'Alternance')
+    comboContrat.current(0)
+    comboContrat.pack(pady=(5, 15), padx=40)
+    
+    # Salaire
+    tk.Label(container, text="Salaire (optionnel)", font=("Arial", 11, "bold"),
+             bg=COULEURS["white"], fg=COULEURS["dark"]).pack(anchor="w", padx=40)
+    entrySalaire = tk.Entry(container, width=50, font=("Arial", 11), bd=2, relief="groove")
+    entrySalaire.pack(pady=(5, 15), padx=40)
+    
+    # Description
+    tk.Label(container, text="Description du poste *", font=("Arial", 11, "bold"),
+             bg=COULEURS["white"], fg=COULEURS["dark"]).pack(anchor="w", padx=40)
+    textDescription = scrolledtext.ScrolledText(container, width=40, height=6, font=("Arial", 10), bd=2, relief="groove")
+    textDescription.pack(pady=(5, 15), padx=40)
+    
+    # Compétences requises
+    tk.Label(container, text="Compétences requises (optionnel)", font=("Arial", 11, "bold"),
+             bg=COULEURS["white"], fg=COULEURS["dark"]).pack(anchor="w", padx=40)
+    textCompetences = scrolledtext.ScrolledText(container, width=40, height=4, font=("Arial", 10), bd=2, relief="groove")
+    textCompetences.pack(pady=(5, 20), padx=40)
+    
+    def publier():
+        titre = entryTitre.get()
+        entreprise = entryEntreprise.get()
+        localisation = entryLocalisation.get()
+        type_contrat = comboContrat.get()
+        salaire = entrySalaire.get() or None
+        description = textDescription.get("1.0", "end-1c")
+        competences = textCompetences.get("1.0", "end-1c") or None
+        
+        if not titre or not entreprise or not localisation or not description:
+            messagebox.showerror("Erreur", "Veuillez remplir tous les champs obligatoires (*)")
+            return
+        
+        conn = get_db_connection()
+        if conn:
+            try:
+                cursor = conn.cursor()
+                cursor.execute("SELECT id FROM utilisateurs WHERE email = %s", (current_user,))
+                user_id = cursor.fetchone()[0]
+                
+                cursor.execute("""
+                    INSERT INTO offres_emploi 
+                    (recruteur_id, titre, entreprise, localisation, type_contrat, salaire, description, competences)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (user_id, titre, entreprise, localisation, type_contrat, salaire, description, competences))
+                
+                conn.commit()
+                cursor.close()
+                conn.close()
+                
+                messagebox.showinfo("Succès", "Votre offre a été publiée avec succès !")
+                show_mes_offres(main_frame)
+            except Error as e:
+                messagebox.showerror("Erreur", f"Erreur lors de la publication: {e}")
