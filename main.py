@@ -1,8 +1,4 @@
 # main.py
-"""
-JobFinder - Application de recherche d'emploi
-Point d'entrée principal
-"""
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
@@ -43,7 +39,7 @@ class JobFinderApp:
       #  self.show_accueil()
     
     def load_images(self):
-        """Charge les images nécessaires"""
+        
         try:
             self.navIcon = ImageTk.PhotoImage(Image.open(IMAGES['menu']).resize((25, 25)))
             self.closeIcon = ImageTk.PhotoImage(Image.open(IMAGES['close']).resize((25, 25)))
@@ -51,7 +47,7 @@ class JobFinderApp:
             self.navIcon = self.closeIcon = None
     
     def create_ui(self):
-        """Crée l'interface utilisateur"""
+        
         # Barre du haut
         self.topFrame = tk.Frame(self.app, bg=COULEURS["primary"], height=60)
         self.topFrame.pack(side="top", fill=tk.X)
@@ -87,7 +83,7 @@ class JobFinderApp:
         self.create_sidebar()
     
     def create_sidebar(self):
-        """Crée le menu latéral"""
+        
         self.navLateral = tk.Frame(self.app, bg="#263238", width=300, height=700)
         self.navLateral.place(x=-300, y=0)
         

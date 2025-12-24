@@ -1,8 +1,3 @@
-
-"""
-Module UI pour JobFinder
-"""
-
 # Variables globales partagées entre les modules UI
 current_user = None
 user_type = None

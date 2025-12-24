@@ -1,7 +1,4 @@
-# ui/auth.py
-"""
-Gestion de l'authentification (connexion/inscription)
-"""
+# authantification
 import tkinter as tk
 from tkinter import messagebox
 from mysql.connector import Error
@@ -167,7 +164,6 @@ def show_inscription(main_frame, go_profil_callback, go_connexion_callback):
 
 
 def ajouter_utilisateur(nom, email, mdp, type_user, go_profil_callback):
-<<<<<<< HEAD
     """Ajoute un nouvel utilisateur dans la base de données avec validation d'email"""
     # Validation des champs obligatoires
     if not nom or not email or not mdp or not type_user:
@@ -259,9 +255,6 @@ def ajouter_utilisateur(nom, email, mdp, type_user, go_profil_callback):
         else:
             messagebox.showerror("Erreur", f"Erreur lors de l'inscription: {e}")
 
-=======
-    return
->>>>>>> 1168f70 (update)
 
 def show_connexion(main_frame, go_profil_callback, go_admin_callback, go_inscription_callback):
     """Affiche la page de connexion"""
@@ -288,10 +281,7 @@ def show_connexion(main_frame, go_profil_callback, go_admin_callback, go_inscrip
              bg=COULEURS["white"], fg=COULEURS["dark"]).pack(anchor="w", padx=40)
     entryMDP = tk.Entry(container, show="●", width=35, font=("Arial", 11), bd=2, relief="groove")
     entryMDP.pack(pady=(5, 20), padx=40)
-<<<<<<< HEAD
 
-=======
->>>>>>> 1168f70 (update)
     def connecter():
         email = entryEmail.get()
         mdp = entryMDP.get()
