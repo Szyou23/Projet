@@ -135,3 +135,4 @@ def show_toutes_offres(main_frame):
                 
         except Error as e:
             messagebox.showerror("Erreur", f"Erreur de chargement: {e}")
+            messagebox.showerror("Erreur", f"Erreur de chargement: {e}")
