@@ -4,7 +4,7 @@ from config import COULEURS
 
 
 def show_contact(main_frame):
-    """Affiche la page de contact"""
+    #Affiche la page de contact
     for widget in main_frame.winfo_children():
         widget.destroy()
 

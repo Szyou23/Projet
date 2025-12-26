@@ -1,7 +1,3 @@
-# ui/admin.py
-"""
-Panel administrateur
-"""
 import tkinter as tk
 from tkinter import messagebox
 from mysql.connector import Error
@@ -10,11 +6,9 @@ from database import get_db_connection
 import ui
 
 def show_admin_dashboard(main_frame, go_users_callback, go_offres_callback):
-    """Tableau de bord administrateur"""
     for widget in main_frame.winfo_children():
         widget.destroy()
     
-    # Header
     headerFrame = tk.Frame(main_frame, bg=COULEURS["admin"], height=150)
     headerFrame.pack(fill="x")
     
@@ -26,7 +20,6 @@ def show_admin_dashboard(main_frame, go_users_callback, go_offres_callback):
         fg=COULEURS["white"]
     ).pack(pady=50)
     
-    # Statistiques
     statsFrame = tk.Frame(main_frame, bg=COULEURS["light_bg"])
     statsFrame.pack(fill="both", expand=True, pady=20)
     
@@ -122,7 +115,6 @@ def show_admin_dashboard(main_frame, go_users_callback, go_offres_callback):
             messagebox.showerror("Erreur", f"Erreur de chargement des statistiques: {e}")
 
 def show_admin_utilisateurs(main_frame):
-    """Gestion des utilisateurs par l'admin"""
     for widget in main_frame.winfo_children():
         widget.destroy()
     
@@ -239,7 +231,6 @@ def show_admin_utilisateurs(main_frame):
     scrollbar.pack(side="right", fill="y")
 
 def supprimer_utilisateur(main_frame, user_id, nom):
-    """Supprime un utilisateur"""
     reponse = messagebox.askyesno(
         "Confirmation",
         f"Êtes-vous sûr de vouloir supprimer l'utilisateur '{nom}' ?\nToutes ses offres seront également supprimées."
@@ -261,7 +252,6 @@ def supprimer_utilisateur(main_frame, user_id, nom):
                 messagebox.showerror("Erreur", f"Erreur lors de la suppression: {e}")
 
 def show_admin_offres(main_frame):
-    """Gestion des offres par l'admin"""
     for widget in main_frame.winfo_children():
         widget.destroy()
     
@@ -391,11 +381,9 @@ def show_admin_offres(main_frame):
     scrollbar.pack(side="right", fill="y")
 
 def voir_offre_admin(main_frame, offre_id):
-    """Voir une offre (admin)"""
     from ui.offers import voir_offre
     voir_offre(main_frame, offre_id)
 
 def supprimer_offre_admin(main_frame, offre_id):
-    """Supprimer une offre (admin)"""
     from ui.offers import supprimer_offre
     supprimer_offre(main_frame, offre_id)
