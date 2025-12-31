@@ -1,4 +1,3 @@
-# main.py
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
@@ -11,7 +10,6 @@ from ui.contact import show_contact
 from ui.offers import show_offres
 from ui.admin import show_admin_dashboard
 from ui.settings import show_parametres
-from ui.init import set_btn_state, get_btn_state, set_current_user,get_current_user
 
 class JobFinderApp:
     def __init__(self):
@@ -36,7 +34,7 @@ class JobFinderApp:
         self.init_database()
         
         # Affichage de la page d'accueil
-      #  self.show_accueil()
+        self.show_accueil()
     
     def load_images(self):
         
@@ -98,9 +96,10 @@ class JobFinderApp:
         ).place(x=0, y=0)
         
         self.update_menu()
+
     def update_menu(self):
         
-        current_user, user_type = get_current_user()
+        current_user, user_type = ui.get_current_user()
         
         if user_type == "admin":
             menu_buttons = [
@@ -151,13 +150,13 @@ class JobFinderApp:
     
     def toggle_menu(self):
         """Toggle l'animation du menu"""
-        if get_btn_state():
+        if ui.get_btn_state():
             for x in range(0, 301, 15):
                 self.navLateral.place(x=-x, y=0)
                 self.app.update()
             self.navLateral.place(x=-300, y=0)
             self.navbarBtn.config(image=self.navIcon)
-            set_btn_state(False)
+            ui.set_btn_state(False)
         else:
             self.update_menu()
             for x in range(-300, 1, 15):
@@ -166,11 +165,11 @@ class JobFinderApp:
             self.navLateral.place(x=0, y=0)
             self.topFrame.tkraise()
             self.navbarBtn.config(image=self.closeIcon)
-            set_btn_state(True)
+            ui.set_btn_state(True)
     
     def close_menu_if_open(self):
         """Ferme le menu s'il est ouvert"""
-        if get_btn_state():
+        if ui.get_btn_state():
             self.toggle_menu()
     
     def show_accueil(self):
@@ -205,7 +204,7 @@ class JobFinderApp:
         buttonsFrame = tk.Frame(self.mainFrame, bg=COULEURS["light_bg"])
         buttonsFrame.pack(fill="both", expand=True)
 
-        current_user, user_type = get_current_user()
+        current_user, user_type = ui.get_current_user()
         
         if current_user:
             btnContainer = tk.Frame(buttonsFrame, bg=COULEURS["light_bg"])
@@ -336,10 +335,9 @@ class JobFinderApp:
     
     def go_admin_users(self):
         """Affiche la gestion des utilisateurs (admin)"""
-        pass
-    #    from ui.admin import show_admin_utilisateurs
+        from ui.admin import show_admin_utilisateurs
         self.close_menu_if_open()
-       # show_admin_utilisateurs(self.mainFrame)
+        show_admin_utilisateurs(self.mainFrame)
     
     def go_parametres(self):
         """Affiche les paramètres"""

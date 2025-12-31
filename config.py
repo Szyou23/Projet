@@ -1,7 +1,3 @@
-"""
-Configuration de l'application JobFinder
-"""
-
 # Configuration MySQL
 DB_CONFIG = {
     'host': 'localhost',

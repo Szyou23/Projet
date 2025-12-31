@@ -171,3 +171,121 @@ def show_parametres(main_frame, go_connexion_callback, go_accueil_callback):
         bd=0,
         command=changer_mdp
     ).pack(pady=10)
+
+    if user_type == "admin":
+        frame_type = tk.LabelFrame(
+            container,
+            text="Gestion du type de compte (Admin)",
+            font=("Arial", 11, "bold"),
+            bg=COULEURS["white"],
+            fg=COULEURS["admin"],
+            bd=2,
+            relief="groove",
+            labelanchor="nw"
+        )
+        frame_type.pack(padx=40, pady=15, fill="x")
+
+        tk.Label(
+            frame_type,
+            text="Changer le type de compte d'un utilisateur (recruteur/chercheur)",
+            font=("Arial", 10),
+            bg=COULEURS["white"],
+            fg=COULEURS["dark"],
+            wraplength=430,
+            justify="left"
+        ).pack(anchor="w", padx=15, pady=(10, 5))
+
+        tk.Label(
+            frame_type,
+            text="Email de l'utilisateur",
+            font=("Arial", 10),
+            bg=COULEURS["white"],
+            fg=COULEURS["dark"]
+        ).pack(anchor="w", padx=15, pady=(0, 2))
+        entry_email = tk.Entry(frame_type, width=35, font=("Arial", 10), bd=2, relief="groove")
+        entry_email.pack(padx=15, pady=(0, 8))
+
+        tk.Label(
+            frame_type,
+            text="Nouveau type de compte",
+            font=("Arial", 10),
+            bg=COULEURS["white"],
+            fg=COULEURS["dark"]
+        ).pack(anchor="w", padx=15, pady=(0, 2))
+
+        type_var = tk.StringVar(value="chercheur")
+        combo_type = ttk.Combobox(frame_type, textvariable=type_var, width=33, font=("Arial", 10), state="readonly")
+        combo_type['values'] = ("recruteur", "chercheur")
+        combo_type.current(1)
+        combo_type.pack(padx=15, pady=(0, 10))
+
+        def changer_type():
+            email = entry_email.get().strip()
+            nouveau_type = type_var.get()
+
+            if not email:
+                messagebox.showerror("Erreur", "Veuillez saisir l'email de l'utilisateur.")
+                return
+
+            conn = get_db_connection()
+            if not conn:
+                return
+
+            try:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT id, type_utilisateur FROM utilisateurs WHERE email=%s",
+                    (email,)
+                )
+                row = cursor.fetchone()
+                if not row:
+                    cursor.close()
+                    conn.close()
+                    messagebox.showerror("Erreur", "Aucun utilisateur trouvé avec cet email.")
+                    return
+
+                if row[1] == "admin":
+                    cursor.close()
+                    conn.close()
+                    messagebox.showerror("Erreur", "Vous ne pouvez pas modifier le type d'un administrateur.")
+                    return
+
+                cursor.execute(
+                    "UPDATE utilisateurs SET type_utilisateur=%s WHERE id=%s",
+                    (nouveau_type, row[0])
+                )
+                conn.commit()
+                cursor.close()
+                conn.close()
+
+                messagebox.showinfo("Succès", f"Type de compte mis à jour en '{nouveau_type}'.")
+                entry_email.delete(0, "end")
+
+            except Error as e:
+                messagebox.showerror("Erreur", f"Erreur lors de la mise à jour du type de compte : {e}")
+
+        tk.Button(
+            frame_type,
+            text="Mettre à jour le type de compte",
+            font=("Arial", 11, "bold"),
+            bg=COULEURS["admin"],
+            fg=COULEURS["white"],
+            width=28,
+            height=1,
+            cursor="hand2",
+            bd=0,
+            command=changer_type
+        ).pack(pady=10)
+
+    tk.Button(
+        container,
+        text="⬅️ Retour",
+        font=("Arial", 12, "bold"),
+        bg=COULEURS["primary"],
+        fg=COULEURS["white"],
+        width=20,
+        height=2,
+        cursor="hand2",
+        bd=0,
+        command=go_accueil_callback
+    ).pack(pady=20)
